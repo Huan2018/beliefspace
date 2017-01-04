@@ -61,7 +61,7 @@ def approx_jacobian (x, func, epsilon, f0, *args):
     jac = np.zeros ((n, m))
     dx = np.zeros (n)
     
-    for i in xrange (n):
+    for i in range (n):
         dx[i] = epsilon
         jac[i] = (func (*((x0+dx,)+args)) - f0)/epsilon
         dx[i] = 0.0
@@ -97,14 +97,14 @@ def approx_jacobian_hessian (x, func, epsilon, f0, *args):
     jac, hess = np.zeros (n), np.zeros ((n, n))
     dx = np.zeros (n)
 
-    for i in xrange (n):
+    for i in range (n):
         dx[i] = epsilon
         fp, fm = func (*((x0+dx,)+args)), func (*((x0-dx,)+args))
         jac[i] = (fp - fm)/(2.*epsilon)
         hess[i,i] = (fp + fm - 2.*f0)/epsilon2
         dx[i] = 0.0
 
-        for j in xrange (0,i):
+        for j in range (0,i):
             dx[i], dx[j] = epsilon, epsilon
             fpp = func (*((x0+dx,)+args))
             fmm = func (*((x0-dx,)+args))
@@ -189,7 +189,7 @@ class Belief_ilqg (object):
 
     def nominal_belief (self):
         x,P = [], []
-        for k in xrange (self.nsteps):
+        for k in range (self.nsteps):
             xk,Pk = belief_unpack (self.bbar[:,k])
             x.append (xk)
             P.append (Pk)
@@ -296,19 +296,19 @@ class Belief_ilqg (object):
 
         # evaluate function at adjacent point
         Fki = [np.zeros ((NBEL,NBEL))]*NSTATE
-        for i in xrange (NBEL):
+        for i in range (NBEL):
             dx[i] = epsilon
             Wi = self._dynamics_vector_W (v0 + dx)
             dx[i] = 0.0
-            for j in xrange (NSTATE):
+            for j in range (NSTATE):
                 Fki[j][:,i] = (Wi[:,j] - Wki[j])/epsilon
 
         Gki = [np.zeros ((NBEL,NCONT))]*NSTATE
-        for i in xrange (NCONT):
+        for i in range (NCONT):
             dx[i+NBEL] = epsilon
             Wi = self._dynamics_vector_W (v0 + dx)
             dx[i+NBEL] = 0.0
-            for j in xrange (NSTATE):
+            for j in range (NSTATE):
                 Gki[j][:,i] = (Wi[:,j] - Wki[j])/epsilon
         
         return Fki, Gki, Wki
@@ -331,7 +331,7 @@ class Belief_ilqg (object):
         bbar = np.zeros (self.bbar.shape)
         ubar = np.zeros (self.ubar.shape)
         bbar[:,0] = self.b0
-        for k in xrange (0, self.nsteps-1):
+        for k in range (0, self.nsteps-1):
             ubar[:,k] = L[k].dot (bbar[:,k] - self.bbar[:,k]) + eps*l[k] + self.ubar[:,k]
             bbar[:,k+1] = self._dynamics_g (bbar[:,k], ubar[:,k])
         return bbar, ubar
@@ -398,7 +398,7 @@ class Belief_ilqg (object):
         sk, Sk = approx_jacobian_hessian (bbar[:,-1],
                 self._cost_terminal, 1e-6, ssk)
 
-        for k in xrange (self.nsteps-2, -1, -1):
+        for k in range (self.nsteps-2, -1, -1):
             bk, uk = bbar[:,k], ubar[:,k]
 
             # 1. linearize dynamics about nominal
@@ -442,7 +442,7 @@ class Belief_ilqg (object):
 
         # backward recursion starting with step N-1 (N-2 for 0 indexed)
         L, l = [None]*(self.nsteps-1), [None]*(self.nsteps-1)
-        for k in xrange (self.nsteps-2, -1, -1):
+        for k in range (self.nsteps-2, -1, -1):
             Lk, lk, Sk, sk, ssk = self._value_iteration_step (k, Sk, sk, ssk)
             L[k] = Lk
             l[k] = lk
@@ -457,14 +457,14 @@ class Belief_ilqg (object):
             # compute expected cost
             ssk = self._compute_approximate_cost (bbar, ubar, L, l)
             if ssk < self.cost:
-                print 'expected cost:', ssk
+                print('expected cost:', ssk)
                 self.cost = ssk
                 for li in l: 
                     li *= eps
                 break
             else:
                 eps /= 2.
-                print '', eps
+                print('', eps)
                 if eps < 0.01:
                     break
 
